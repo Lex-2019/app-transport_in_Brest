@@ -1,97 +1,213 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🚌 Транспорт Бреста
 
-# Getting Started
+Мобильное приложение для пенсионеров и пожилых жителей Бреста, показывающее актуальное расписание общественного транспорта с удобным интерфейсом.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📱 Особенности приложения
 
-## Step 1: Start Metro
+### 🎯 Целевая аудитория
+- **Возраст**: 55+
+- **Язык**: Русский
+- **Уровень владения смартфоном**: Низкий или средний
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### ✨ Основной функционал
+- 🔍 **Поиск маршрута по номеру** (автобус, троллейбус)
+- 📍 **Просмотр ближайших отправлений** по остановке
+- ⭐ **Избранные маршруты** для быстрого доступа
+- 📱 **Режим оффлайн** с последней версией расписания
+- 🔄 **Обновление данных** (ручное и автоматическое)
+- 🔤 **Крупный шрифт** и высокая контрастность
+- 🔊 **Голосовое озвучивание** по желанию
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### 🎨 UX/UI особенности для пожилых пользователей
+- **Крупные кнопки** (56px высота) для удобства нажатия
+- **Высокий контраст** цветов для лучшей видимости
+- **Увеличенные шрифты** (18-28px)
+- **Простая навигация** без сложных жестов
+- **Четкие иконки** и понятные подписи
 
-```sh
-# Using npm
-npm start
+## 🛠 Технологический стек
 
-# OR using Yarn
-yarn start
+- **React Native** 0.80.2
+- **TypeScript** для типизации
+- **AsyncStorage** для локального хранения
+- **React Navigation** для навигации
+- **React Native Maps** для карт (планируется)
+- **React Native Geolocation** для геолокации (планируется)
+
+## 📦 Установка и запуск
+
+### Предварительные требования
+- Node.js 18+
+- React Native CLI
+- Android Studio (для Android)
+- Xcode (для iOS, только на macOS)
+
+### Установка зависимостей
+```bash
+npm install
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+### Запуск на Android
+```bash
 npm run android
+```
 
-# OR using Yarn
-yarn android
+### Запуск на iOS
+```bash
+npm run ios
+```
+
+### Запуск Metro сервера
+```bash
+npm start
+```
+
+## 📁 Структура проекта
+
+```
+src/
+├── components/          # Переиспользуемые компоненты
+│   ├── LargeButton.tsx # Большие кнопки для пожилых
+│   └── RouteCard.tsx   # Карточки маршрутов
+├── screens/            # Экраны приложения
+│   └── HomeScreen.tsx  # Главный экран
+├── services/           # Сервисы для работы с данными
+│   └── transportService.ts
+├── types/              # TypeScript типы
+│   └── index.ts
+├── utils/              # Утилиты и константы
+│   ├── constants.ts
+│   └── helpers.ts
+└── assets/             # Ресурсы (иконки, изображения)
+    └── icons/
+```
+
+## 🚀 Функциональность
+
+### ✅ Реализовано
+- [x] Поиск маршрутов по номеру
+- [x] Отображение списка всех маршрутов
+- [x] Система избранных маршрутов
+- [x] Обновление данных с pull-to-refresh
+- [x] Адаптивный дизайн для пожилых пользователей
+- [x] Оффлайн режим с кэшированием
+- [x] Моковые данные для демонстрации
+
+### 🔄 В разработке
+- [ ] Геолокация и ближайшие остановки
+- [ ] Построение маршрутов "из А в Б"
+- [ ] Интеграция с реальным API
+- [ ] Голосовое сопровождение
+- [ ] Настройки приложения
+
+### 📋 Планируется
+- [ ] Карты с остановками
+- [ ] Уведомления о прибытии транспорта
+- [ ] Темная тема
+- [ ] Многоязычность (белорусский язык)
+- [ ] Аналитика использования
+
+## 🎨 Дизайн-система
+
+### Цвета
+- **Primary**: #FF6B35 (Оранжевый - хорошо видимый)
+- **Secondary**: #2E86AB (Синий)
+- **Background**: #FFFFFF (Белый фон)
+- **Surface**: #F8F9FA (Светло-серый)
+- **Text**: #1A1A1A (Почти черный текст)
+
+### Размеры шрифтов
+- **Small**: 14-20px
+- **Medium**: 16-24px (по умолчанию)
+- **Large**: 20-28px
+
+### Размеры элементов
+- **Кнопки**: 56px высота
+- **Поля ввода**: 48px высота
+- **Отступы**: 12-16px
+- **Радиус скругления**: 8px
+
+## 🔧 Конфигурация
+
+### Настройки геолокации
+```typescript
+LOCATION_CONFIG = {
+  timeout: 10000,        // 10 секунд
+  maximumAge: 60000,     // 1 минута
+  enableHighAccuracy: true,
+  distanceFilter: 10,    // 10 метров
+}
+```
+
+### Настройки кэширования
+```typescript
+CACHE_CONFIG = {
+  routesTTL: 24 * 60 * 60 * 1000,  // 24 часа
+  scheduleTTL: 60 * 60 * 1000,      // 1 час
+  locationTTL: 5 * 60 * 1000,       // 5 минут
+}
+```
+
+## 📊 Моковые данные
+
+Приложение использует моковые данные для демонстрации:
+
+### Маршруты
+- **№1**: Центр - Вулька (автобус)
+- **№2**: Центр - Южный (автобус)
+- **№3**: Центр - Северный (троллейбус)
+- **№4**: Вулька - Южный (автобус)
+- **№5**: Центр - Аэропорт (троллейбус)
+
+### Остановки
+- Центр (52.0976, 23.7341)
+- Вулька (52.1023, 23.7289)
+- Южный (52.0921, 23.7398)
+- Северный (52.1034, 23.7412)
+- Аэропорт (52.1087, 23.7156)
+
+## 🧪 Тестирование
+
+### Запуск тестов
+```bash
+npm test
+```
+
+### Линтинг
+```bash
+npm run lint
+```
+
+## 📱 Сборка для релиза
+
+### Android APK
+```bash
+cd android
+./gradlew assembleRelease
 ```
 
 ### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+cd ios
+xcodebuild -workspace TransportBrest.xcworkspace -scheme TransportBrest -configuration Release
 ```
 
-Then, and every time you update your native dependencies, run:
+## 🤝 Вклад в проект
 
-```sh
-bundle exec pod install
-```
+1. Форкните репозиторий
+2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
+3. Зафиксируйте изменения (`git commit -m 'Add amazing feature'`)
+4. Отправьте в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 📄 Лицензия
 
-```sh
-# Using npm
-npm run ios
+Этот проект распространяется под лицензией MIT. См. файл `LICENSE` для получения дополнительной информации.
 
-# OR using Yarn
-yarn ios
-```
+## 📞 Поддержка
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Если у вас есть вопросы или предложения, создайте issue в репозитории.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**Разработано с ❤️ для пожилых жителей Бреста**
