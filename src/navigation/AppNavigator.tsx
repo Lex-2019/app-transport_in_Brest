@@ -3,10 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import ScheduleScreen from '../screens/ScheduleScreen';
+import { Route } from '../types';
 
 export type RootStackParamList = {
   Home: undefined;
-  Schedule: undefined;
+  Schedule: { selectedRoute?: Route } | undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

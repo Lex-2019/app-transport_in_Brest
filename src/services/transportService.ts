@@ -40,6 +40,27 @@ const MOCK_ROUTES: Route[] = [
     name: 'Центр - Аэропорт',
     description: 'Центр города - Аэропорт',
   },
+  {
+    id: '6',
+    number: '6',
+    type: 'minibus',
+    name: 'Центр - Западный',
+    description: 'Центр города - микрорайон Западный',
+  },
+  {
+    id: '7',
+    number: '7',
+    type: 'minibus',
+    name: 'Вулька - Северный',
+    description: 'Микрорайон Вулька - микрорайон Северный',
+  },
+  {
+    id: '8',
+    number: '8',
+    type: 'bus',
+    name: 'Центр - Восточный',
+    description: 'Центр города - микрорайон Восточный',
+  },
 ];
 
 const MOCK_STOPS: Stop[] = [

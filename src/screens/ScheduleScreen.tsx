@@ -12,14 +12,19 @@ import {
 import { COLORS, SIZES, FONT_SIZES } from '../utils/constants';
 import LargeButton from '../components/LargeButton';
 import TransportService from '../services/transportService';
-import { Stop, ScheduleItem } from '../types';
+import { Stop, ScheduleItem, Route } from '../types';
 import { searchStopsByName, getScheduleForStop, formatTime } from '../utils/helpers';
 
 interface ScheduleScreenProps {
   navigation?: any;
+  route?: {
+    params?: {
+      selectedRoute?: Route;
+    };
+  };
 }
 
-const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
+const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation, route }) => {
   const [stops, setStops] = useState<Stop[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +38,21 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    // Если перешли с предвыбранным маршрутом, показываем его расписание
+    if (route?.params?.selectedRoute) {
+      const selectedRoute = route.params.selectedRoute;
+      // Находим остановки, где проходит этот маршрут
+      const routeStops = stops.filter(stop => 
+        stop.routes.some(r => r.id === selectedRoute.id)
+      );
+      if (routeStops.length > 0) {
+        // Показываем первую остановку с этим маршрутом
+        handleStopPress(routeStops[0]);
+      }
+    }
+  }, [route?.params?.selectedRoute, stops]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -73,6 +93,16 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
     setStopSchedules([]);
   };
 
+  const handleBackToHome = () => {
+    if (selectedStop) {
+      // Если мы в экране расписания остановки, возвращаемся к списку остановок
+      handleBackToStops();
+    } else if (navigation?.canGoBack()) {
+      // Если мы в списке остановок, возвращаемся в главное меню
+      navigation.goBack();
+    }
+  };
+
   const handleSearchStops = () => {
     if (!searchQuery.trim()) {
       Alert.alert('Внимание', 'Введите название остановки для поиска');
@@ -87,11 +117,29 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
   };
 
   const getTransportIcon = (type: string) => {
-    return type === 'bus' ? '🚌' : '🚎';
+    switch (type) {
+      case 'bus':
+        return '🚌';
+      case 'trolleybus':
+        return '🚎';
+      case 'minibus':
+        return '🚐';
+      default:
+        return '🚌';
+    }
   };
 
   const getTransportColor = (type: string) => {
-    return type === 'bus' ? COLORS.primary : COLORS.secondary;
+    switch (type) {
+      case 'bus':
+        return COLORS.primary;
+      case 'trolleybus':
+        return COLORS.secondary;
+      case 'minibus':
+        return COLORS.minibus;
+      default:
+        return COLORS.primary;
+    }
   };
 
   const renderStopItem = (stop: Stop) => (
@@ -150,12 +198,18 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
   if (selectedStop) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView style={styles.scrollView}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
+          alwaysBounceVertical={false}
+        >
           {/* Заголовок с кнопкой назад */}
           <View style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={handleBackToStops}
+              onPress={handleBackToHome}
               activeOpacity={0.8}
             >
               <Text style={styles.backButtonText}>← Назад</Text>
@@ -190,7 +244,13 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        alwaysBounceVertical={false}
+      >
         {/* Заголовок */}
         <View style={styles.header}>
           <Text style={styles.title}>Остановки</Text>
@@ -207,6 +267,18 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ navigation }) => {
             onChangeText={setSearchQuery}
             autoCapitalize="none"
             autoCorrect={false}
+            keyboardType="default"
+            returnKeyType="search"
+            textContentType="none"
+            autoComplete="off"
+            spellCheck={false}
+            multiline={false}
+            maxLength={100}
+            blurOnSubmit={true}
+            onSubmitEditing={handleSearchStops}
+            enablesReturnKeyAutomatically={true}
+            clearButtonMode="while-editing"
+            selectTextOnFocus={false}
           />
           <LargeButton
             title="Найти"
@@ -239,6 +311,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: SIZES.padding * 2,
   },
   header: {
     padding: SIZES.padding,

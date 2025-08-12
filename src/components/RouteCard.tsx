@@ -24,12 +24,30 @@ const RouteCard: React.FC<RouteCardProps> = ({
   isFavorite,
   style,
 }) => {
-  const getTransportIcon = (type: 'bus' | 'trolleybus') => {
-    return type === 'bus' ? '🚌' : '🚎';
+  const getTransportIcon = (type: 'bus' | 'trolleybus' | 'minibus') => {
+    switch (type) {
+      case 'bus':
+        return '🚌';
+      case 'trolleybus':
+        return '🚎';
+      case 'minibus':
+        return '🚐';
+      default:
+        return '🚌';
+    }
   };
 
-  const getTransportTypeText = (type: 'bus' | 'trolleybus') => {
-    return type === 'bus' ? 'Автобус' : 'Троллейбус';
+  const getTransportTypeText = (type: 'bus' | 'trolleybus' | 'minibus') => {
+    switch (type) {
+      case 'bus':
+        return 'Автобус';
+      case 'trolleybus':
+        return 'Троллейбус';
+      case 'minibus':
+        return 'Маршрутное такси';
+      default:
+        return 'Автобус';
+    }
   };
 
   return (
@@ -146,3 +164,4 @@ const styles = StyleSheet.create({
 });
 
 export default RouteCard;
+

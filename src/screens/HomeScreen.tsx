@@ -12,6 +12,7 @@ import {
 import { COLORS, SIZES, FONT_SIZES, APP_NAME } from '../utils/constants';
 import LargeButton from '../components/LargeButton';
 import RouteCard from '../components/RouteCard';
+import TransportTypeFilter, { TransportType } from '../components/TransportTypeFilter';
 import TransportService from '../services/transportService';
 import { Route } from '../types';
 import { searchRoutesByNumber } from '../utils/helpers';
@@ -27,6 +28,8 @@ const HomeScreen: React.FC = () => {
   const [favoriteRoutes, setFavoriteRoutes] = useState<Route[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRoutes, setFilteredRoutes] = useState<Route[]>([]);
+  const [selectedTransportType, setSelectedTransportType] = useState<TransportType>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'schedule'>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -38,13 +41,27 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = searchRoutesByNumber(routes, searchQuery);
-      setFilteredRoutes(filtered);
-    } else {
-      setFilteredRoutes(routes);
+    // Сброс активной вкладки при изменении маршрутов
+    if (activeTab === 'favorites' && favoriteRoutes.length === 0) {
+      setActiveTab('all');
     }
-  }, [searchQuery, routes]);
+  }, [favoriteRoutes, activeTab]);
+
+  useEffect(() => {
+    let filtered = routes;
+    
+    // Фильтрация по типу транспорта
+    if (selectedTransportType !== 'all') {
+      filtered = filtered.filter(route => route.type === selectedTransportType);
+    }
+    
+    // Фильтрация по поиску
+    if (searchQuery.trim()) {
+      filtered = searchRoutesByNumber(filtered, searchQuery);
+    }
+    
+    setFilteredRoutes(filtered);
+  }, [searchQuery, routes, selectedTransportType]);
 
   const loadData = async () => {
     try {
@@ -84,10 +101,16 @@ const HomeScreen: React.FC = () => {
   const handleRoutePress = (route: Route) => {
     Alert.alert(
       `Маршрут №${route.number}`,
-      `${route.name}\n\n${route.description || ''}`,
+      `${route.name}\n\n${route.description || 'Описание маршрута отсутствует'}\n\nТип: ${getTransportTypeText(route.type)}`,
       [
         { text: 'Закрыть', style: 'cancel' },
-        { text: 'Подробнее', onPress: () => console.log('Подробнее о маршруте') },
+        { 
+          text: 'Расписание', 
+          onPress: () => {
+            // Переходим к расписанию с предвыбранным маршрутом
+            navigation?.navigate('Schedule', { selectedRoute: route });
+          } 
+        },
       ]
     );
   };
@@ -124,11 +147,20 @@ const HomeScreen: React.FC = () => {
     }
     setFilteredRoutes(favoriteRoutes);
     setSearchQuery('');
+    setSelectedTransportType('all');
+    setActiveTab('favorites');
   };
 
   const handleShowAllRoutes = () => {
     setFilteredRoutes(routes);
     setSearchQuery('');
+    setSelectedTransportType('all');
+    setActiveTab('all');
+  };
+
+  const handleShowSchedule = () => {
+    setActiveTab('schedule');
+    navigation?.navigate('Schedule');
   };
 
   const formatLastUpdate = (date: Date | null): string => {
@@ -142,13 +174,30 @@ const HomeScreen: React.FC = () => {
     });
   };
 
+  const getTransportTypeText = (type: 'bus' | 'trolleybus' | 'minibus') => {
+    switch (type) {
+      case 'bus':
+        return 'Автобус';
+      case 'trolleybus':
+        return 'Троллейбус';
+      case 'minibus':
+        return 'Маршрутное такси';
+      default:
+        return 'Автобус';
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        alwaysBounceVertical={false}
       >
         {/* Заголовок */}
         <View style={styles.header}>
@@ -166,6 +215,18 @@ const HomeScreen: React.FC = () => {
             onChangeText={setSearchQuery}
             autoCapitalize="none"
             autoCorrect={false}
+            keyboardType="default"
+            returnKeyType="search"
+            textContentType="none"
+            autoComplete="off"
+            spellCheck={false}
+            multiline={false}
+            maxLength={50}
+            blurOnSubmit={true}
+            onSubmitEditing={handleSearchRoutes}
+            enablesReturnKeyAutomatically={true}
+            clearButtonMode="while-editing"
+            selectTextOnFocus={false}
           />
           <LargeButton
             title="Найти"
@@ -174,27 +235,33 @@ const HomeScreen: React.FC = () => {
           />
         </View>
 
+        {/* Фильтр по типу транспорта */}
+        <TransportTypeFilter
+          selectedType={selectedTransportType}
+          onTypeSelect={setSelectedTransportType}
+        />
+
         {/* Основные кнопки */}
         <View style={styles.buttonSection}>
           <LargeButton
             title="Все маршруты"
             onPress={handleShowAllRoutes}
-            variant="primary"
-            style={styles.mainButton}
+            variant={activeTab === 'all' ? 'primary' : 'secondary'}
+            style={activeTab === 'all' ? styles.activeMainButton : styles.mainButton}
           />
           
           <LargeButton
             title="Избранные маршруты"
             onPress={handleShowFavorites}
-            variant="secondary"
-            style={styles.mainButton}
+            variant={activeTab === 'favorites' ? 'primary' : 'secondary'}
+            style={activeTab === 'favorites' ? styles.activeMainButton : styles.mainButton}
           />
           
           <LargeButton
             title="Расписание остановок"
-            onPress={() => navigation?.navigate('Schedule')}
-            variant="secondary"
-            style={styles.mainButton}
+            onPress={handleShowSchedule}
+            variant={activeTab === 'schedule' ? 'primary' : 'secondary'}
+            style={activeTab === 'schedule' ? styles.activeMainButton : styles.mainButton}
           />
           
           <LargeButton
@@ -232,15 +299,20 @@ const HomeScreen: React.FC = () => {
               {searchQuery.trim() ? 'Маршруты не найдены' : 'Нет доступных маршрутов'}
             </Text>
           ) : (
-            filteredRoutes.map(route => (
-              <RouteCard
-                key={route.id}
-                route={route}
-                onPress={() => handleRoutePress(route)}
-                onFavoritePress={() => handleFavoritePress(route)}
-                isFavorite={favoriteRoutes.some(fav => fav.id === route.id)}
-              />
-            ))
+            <>
+              <Text style={styles.routesCountText}>
+                Найдено маршрутов: {filteredRoutes.length}
+              </Text>
+              {filteredRoutes.map(route => (
+                <RouteCard
+                  key={route.id}
+                  route={route}
+                  onPress={() => handleRoutePress(route)}
+                  onFavoritePress={() => handleFavoritePress(route)}
+                  isFavorite={favoriteRoutes.some(fav => fav.id === route.id)}
+                />
+              ))}
+            </>
           )}
         </View>
       </ScrollView>
@@ -255,6 +327,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: SIZES.padding * 2,
   },
   header: {
     padding: SIZES.padding,
@@ -298,6 +374,12 @@ const styles = StyleSheet.create({
   mainButton: {
     marginBottom: SIZES.margin,
   },
+  activeMainButton: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    borderWidth: 2,
+    marginBottom: SIZES.margin,
+  },
   updateInfo: {
     padding: SIZES.padding,
     backgroundColor: COLORS.surface,
@@ -320,6 +402,7 @@ const styles = StyleSheet.create({
   },
   routesSection: {
     padding: SIZES.padding,
+    flex: 1,
   },
   loadingText: {
     fontSize: FONT_SIZES.medium.body,
@@ -332,6 +415,12 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
     padding: SIZES.padding * 2,
+  },
+  routesCountText: {
+    fontSize: FONT_SIZES.medium.body,
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: SIZES.margin,
   },
 });
 

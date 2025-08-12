@@ -3,7 +3,7 @@
 export interface Route {
   id: string;
   number: string;
-  type: 'bus' | 'trolleybus';
+  type: 'bus' | 'trolleybus' | 'minibus';
   name: string;
   description?: string;
   isFavorite?: boolean;
